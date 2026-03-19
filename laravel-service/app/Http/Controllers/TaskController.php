@@ -1,116 +1,92 @@
 <?php
 
-use App\Models\User;
+namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
 
-Class TaskController extends Controller
+class TaskController extends Controller
 {
+    public function crearTarea(Request $request)
+    {
+        $headers = ['Authorization' => 'Token ' . env('clave')];
 
-    public function crearTarea(Request $request){
-        $user = auth()->user();
-        $express = env('EXPRESS_URL');
-        $headers = ['Authorization'=>'Token'.env('clave')];
-
-        $tarea  = Http::AuthHeader($headers)->post($express/tasks,[
-            'id_task' => request -> id_task,
-            'title' => request-> title,
-            'description' => request -> description,
-            'status' => request -> status,
+        $tarea = Http::withHeaders($headers)->post(env('EXPRESS_URL') . '/tasks', [
+            'id_task'     => $request->id_task,
+            'title'       => $request->title,
+            'description' => $request->description,
+            'status'      => $request->status,
         ]);
-        if ($tarea->failed){
-            return response()->json(["message" =>'error',502]);
+
+        if ($tarea->failed()) {
+            return response()->json(['message' => 'error'], 502);
         }
 
+        return response()->json(['message' => 'ok'], 200);
     }
 
-    public function traerTarea(Request $request){
-        $user = auth()->user();
-        $express = env('EXPRESS_URL');
+    public function traerTareas()
+    {
+        $headers  = ['Authorization' => 'Token ' . env('clave')];
+        $response = Http::withHeaders($headers)->get(env('EXPRESS_URL') . '/tasks');
 
-        $tarea  = Http::AuthHeader($headers)->post($express/tasks,[
-            
-        ]);
-        if ($tarea->failed){
-            return response()->json(["message" =>'error',502]);
-        }
-    }
-
-
-    public function traerTareas(Request $request){
-        $user = auth()->user();
-        $express = env('EXPRESS_URL');
-        $headers = ['Authorization'=>'Token'.env('clave')];
-
-        $tarea  = Http::AuthHeader($headers)->post($express/tasks,[
-            'id_task' => request -> id_task,
-            'title' => request-> title,
-            'description' => request -> description,
-            'status' => request -> status,
-        ]);
-        if ($tarea->failed){
-            return response()->json(["message" =>'error',502]);
+        if ($response->failed()) {
+            return response()->json(['message' => 'error'], 502);
         }
 
-
+        return response()->json($response->json(), 200);
     }
 
-    public function actualizarTarea(Request $request){
-        $user = auth()->user();
-        $express = env('EXPRESS_URL');
-        $headers = ['Authorization'=>'Token'.env('clave')];
+    public function traerTareasPorUsuario($usuario)
+    {
+        $headers  = ['Authorization' => 'Token ' . env('clave')];
+        $response = Http::withHeaders($headers)->get(env('EXPRESS_URL') . '/tasks/' . $usuario);
 
-        $tarea  = Http::AuthHeader($headers)->post($express/tasks,[
-            'id_task' => request -> id_task,
-            'title' => request-> title,
-            'description' => request -> description,
-            'status' => request -> status,
-        ]);
-        if ($tarea->failed){
-            return response()->json(["message" =>'error',502]);
+        if ($response->failed()) {
+            return response()->json(['message' => 'error'], 502);
         }
 
-
+        return response()->json($response->json(), 200);
     }
 
-    public function borrarTarea(Request $request){
-        $user = auth()->user();
-        $express = env('EXPRESS_URL');
-        $headers = ['Authorization'=>'Token'.env('clave')];
+    public function actualizarTarea(Request $request, $id)
+    {
+        $headers = ['Authorization' => 'Token ' . env('clave')];
 
-        $tarea  = Http::AuthHeader($headers)->post($express/tasks,[
-            'id_task' => request -> id_task,
-            'title' => request-> title,
-            'description' => request -> description,
-            'status' => request -> status,
+        $tarea = Http::withHeaders($headers)->put(env('EXPRESS_URL') . '/tasks/' . $id, [
+            'title'       => $request->title,
+            'description' => $request->description,
+            'status'      => $request->status,
         ]);
-        if ($tarea->failed){
-            return response()->json(["message" =>'error',502]);
+
+        if ($tarea->failed()) {
+            return response()->json(['message' => 'error'], 502);
         }
 
-
+        return response()->json(['message' => 'Tarea actualizada'], 200);
     }
 
-    public function borrarTareas(Request $request){
-        $user = auth()->user();
-        $express = env('EXPRESS_URL');
-        $headers = ['Authorization'=>'Token'.env('clave')];
+    public function borrarTarea($id)
+    {
+        $headers = ['Authorization' => 'Token ' . env('clave')];
+        $tarea   = Http::withHeaders($headers)->delete(env('EXPRESS_URL') . '/tasks/' . $id);
 
-        $tarea  = Http::AuthHeader($headers)->post($express/tasks,[
-            'id_task' => request -> id_task,
-            'title' => request-> title,
-            'description' => request -> description,
-            'status' => request -> status,
-        ]);
-        if ($tarea->failed){
-            return response()->json(["message" =>'error',502]);
+        if ($tarea->failed()) {
+            return response()->json(['message' => 'error'], 502);
         }
 
-
+        return response()->json(['message' => 'Tarea eliminada'], 200);
     }
 
-    
+    public function borrarTareasPorUsuario($usuario)
+    {
+        $headers  = ['Authorization' => 'Token ' . env('clave')];
+        $response = Http::withHeaders($headers)->delete(env('EXPRESS_URL') . '/tasks/usuario/' . $usuario);
 
+        if ($response->failed()) {
+            return response()->json(['message' => 'error'], 502);
+        }
 
+        return response()->json(['message' => 'Tareas eliminadas'], 200);
+    }
 }

@@ -1,30 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Http\Request;
-use App\Http\Controller\AuthContorller;
-
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TaskController;
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login',    [AuthController::class, 'login']);
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-Route::get('/user/id', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout',[AuthController::class, 'logout']);
+    Route::get('/user',[AuthController::class, 'me']);
+    Route::post('/tasks',[TaskController::class, 'crearTarea']);
+    Route::get('/tasks',[TaskController::class, 'traerTareas']);
+    Route::get('/tasks/{usuario}',[TaskController::class, 'traerTareasPorUsuario']);
+    Route::put('/tasks/{id}',[TaskController::class, 'actualizarTarea']);
+    Route::delete('/tasks/{id}',[TaskController::class, 'borrarTarea']);
+    Route::delete('/tasks/usuario/{usuario}',[TaskController::class, 'borrarTareasPorUsuario']);
+});
